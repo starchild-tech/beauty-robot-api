@@ -20,7 +20,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "."
-        target: "/beauty-robot-api"
+        target: "~/beauty-robot-api"
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@master
@@ -30,6 +30,6 @@ jobs:
         key: ${{secrets.SSH_PRIVATE_KEY}}
         script: |
           npm -v
-          cd /beauty-robot-api
+          cd ~/beauty-robot-api
           npm install
           pm2 start npm -- run dev
