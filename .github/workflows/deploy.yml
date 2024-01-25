@@ -32,4 +32,5 @@ jobs:
           npm -v
           cd ~/beauty-robot-api
           npm install
+          export DB_CONNECTION_STRING="${{secrets.DB_CONNECTION_STRING}}"
           pm2 start npm -- run dev

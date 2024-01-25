@@ -5,11 +5,11 @@ export const startScrapingJob = () => {
     cron.schedule("*/30 * * * *", async () => {
         console.log("Iniciando o processo de scraping a cada 30 minutos.");
         await ProductStoreController.scrapData()
-            .then((res) => {
+            .then(() => {
                 console.log(
                     new Date() + " - CRON => startScrapingJob => successful"
                 )
-                return res;
+                return "ok";
             })
             .catch((err) => {
                 console.log(
