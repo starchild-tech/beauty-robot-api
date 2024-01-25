@@ -39,4 +39,5 @@ jobs:
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
             nvm use 20.11.0
             cd ~/beauty-robot-api
+            npm install
             DB_CONNECTION_STRING="${{ secrets.DB_CONNECTION_STRING }}" pm2 start ./src/server.js --name "beauty-robot-api"
