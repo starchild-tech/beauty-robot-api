@@ -38,8 +38,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Carrega o nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
             nvm use 20.11.0
-            npm -v
             cd ~/beauty-robot-api
             export DB_CONNECTION_STRING="${{ secrets.DB_CONNECTION_STRING }}"
-            echo "DB_CONNECTION_STRING configurada."
+            echo $DB_CONNECTION_STRING
             pm2 start ecosystem.config.json --env production
