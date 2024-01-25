@@ -42,4 +42,3 @@ jobs:
             export DB_CONNECTION_STRING="${{ secrets.DB_CONNECTION_STRING }}"
             echo $DB_CONNECTION_STRING
             pm2 start ecosystem.config.json --env production
-            pm2 logs
