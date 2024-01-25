@@ -34,9 +34,12 @@ jobs:
         username: ${{secrets.DIGITALOCEAN_USERNAME}}
         key: ${{secrets.SSH_PRIVATE_KEY}}
         script: |
-          npm -v
-          nvm use 20.11.0
-          cd ~/beauty-robot-api
-          npm install
-          export DB_CONNECTION_STRING="${{secrets.DB_CONNECTION_STRING}}"
-          pm2 start npm -- run dev
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Carrega o nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            nvm use 20.11.0
+            npm -v
+            cd ~/beauty-robot-api
+            npm install
+            export DB_CONNECTION_STRING="${{secrets.DB_CONNECTION_STRING}}"
+            pm2 start npm -- run dev
