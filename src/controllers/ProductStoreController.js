@@ -35,11 +35,11 @@ const index = async (req, res) => {
 
 const scrapData = async (req, res) => {
     try {
-        const products = await Product.find({
+        const products = await Product.find({});
+        const browser = await puppeteer.launch({
             headless: 'new',
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
-        const browser = await puppeteer.launch();
 
         for (const product of products) {
             const stores = await Store.find({
