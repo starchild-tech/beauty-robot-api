@@ -49,7 +49,7 @@ const scrapData = async (req, res) => {
     try {
         const products = await Product.find({});
         const browser = await puppeteer.launch({
-            headless: 'new',
+            headless: false,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
@@ -102,12 +102,10 @@ const scrapData = async (req, res) => {
                             const originalPrice = item.querySelector(selectors.productOriginalPrice)?.innerText.trim();
                             const linkElement = item.querySelector('a');
                             let productUrl = '';
-                            if (builder !== 'vtex') {
-                                if (!linkElement.href) {
-                                    productUrl = item.querySelector(`a${selectors.productLink}`)?.href;
-                                } else {
-                                    productUrl = linkElement ? linkElement.href : '';
-                                }
+                            if (!linkElement.href && builder !== 'vtex') {
+                                productUrl = item.querySelector(`a${selectors.productLink}`)?.href;
+                            } else {
+                                productUrl = linkElement ? linkElement.href : '';
                             }
 
                             if (productUrl && productUrl.startsWith('/')) {
