@@ -49,7 +49,7 @@ const scrapData = async (req, res) => {
     try {
         const products = await Product.find({});
         const browser = await puppeteer.launch({
-            headless: false,
+            headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
