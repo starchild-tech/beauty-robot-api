@@ -15,6 +15,18 @@ const shouldUpdate = async (productId, storeId) => {
     return !productStore;
 };
 
+const tryNavigate = async (page, url) => {
+    try {
+        await page.goto(url, { waitUntil: 'networkidle0' });
+        return true;
+    } catch (error) {
+        if (error.message.includes('ERR_HTTP2_PROTOCOL_ERROR')) {
+            return false;
+        }
+        throw error;
+    }
+}
+
 const index = async (req, res) => {
     try {
         const {
@@ -51,7 +63,7 @@ const scrapData = async (req, res) => {
                 const updateNeeded = await shouldUpdate(product._id, store._id);
                 if (!updateNeeded) {
                     console.log(`Dados para o produto ${product.name} da loja ${store.name} já estão atualizados.`);
-                    continue; // Pula para a próxima iteração do loop
+                    continue;
                 }
 
                 const page = await browser.newPage();
@@ -70,8 +82,15 @@ const scrapData = async (req, res) => {
                         url = store.baseUrl.replace(/{param}/g, encodeURIComponent(product.name));
                     } else {
                         url = `${store.baseUrl}${encodeURIComponent(product.name)}`
-                    }
-                    await page.goto(url, { waitUntil: 'networkidle0' });
+                    };
+
+                    for (let attempt = 0; attempt < 3; attempt++) {
+                        const success = await tryNavigate(page, url);
+                        if (success) {
+                            break;
+                        }
+                    };
+
                     await page.waitForSelector(store.selectors.productList);
 
                     const productsData = await page.evaluate((selectors, builder, baseUrl) => {
