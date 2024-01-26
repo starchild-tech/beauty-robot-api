@@ -25,7 +25,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(morgan('dev'));
 
-startScrapingJob();
+// startScrapingJob();
 
 import routes from './routes.js';
 app.use('/api', routes);

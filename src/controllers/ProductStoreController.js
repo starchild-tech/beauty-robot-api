@@ -17,7 +17,15 @@ const shouldUpdate = async (productId, storeId) => {
 
 const index = async (req, res) => {
     try {
-        const productStores = await ProductStore.paginate({}, { page: 1, limit: 100, populate: ['product', 'store'] });
+        const {
+            limit = 20,
+            page = 1,
+            order = "desc",
+            sortBy = "createdAt",
+            search = "",
+        } = req.query;
+        const productStores = await ProductStore.paginate({ name: { $regex: search, $options: "i"}
+        }, { page, limit: parseInt(limit), populate: ['product', 'store'], sort: { [sortBy]: order } });
         return res.status(200).json(productStores);
     } catch (error) {
         console.log(error);
@@ -54,10 +62,17 @@ const scrapData = async (req, res) => {
                             console.log(text);
                         }
                     });
-                    await page.goto(`${store.baseUrl}${encodeURIComponent(product.name)}`, { waitUntil: 'networkidle0' });
+                    let url = '';
+                    if (store.baseUrl.includes("{param}")) {
+                        url = store.baseUrl.replace(/{param}/g, encodeURIComponent(product.name));
+                    } else {
+                        url = `${store.baseUrl}${encodeURIComponent(product.name)}`
+                    }
+                    await page.goto(url, { waitUntil: 'networkidle0' });
                     await page.waitForSelector(store.selectors.productList);
 
-                    const productsData = await page.evaluate((selectors, builder) => {
+                    const productsData = await page.evaluate((selectors, builder, baseUrl) => {
+                        const domainBase = new URL(baseUrl).origin;
                         const items = Array.from(document.querySelectorAll(selectors.productList)[0].children).slice(0, 3);
                         return items.map(item => {
                             const name = item.querySelector(selectors.productName)?.innerText.trim();
@@ -73,12 +88,20 @@ const scrapData = async (req, res) => {
                                 }
                             }
 
+                            if (productUrl && productUrl.startsWith('/')) {
+                                productUrl = domainBase + productUrl;
+                            }
+
                             return { name, price, originalPrice, productUrl };
                         });
-                    }, store.selectors, store.builder);
+                    }, store.selectors, store.builder, store.baseUrl);
 
                     if (store.builder === 'vtex') {
                         for (let index = 0; index < productsData.length; index++) {
+                            const product = productsData[index];
+                            if(product.productUrl !== '') {
+                                continue;
+                            }
                             const selector = `${store.selectors.productCarouselItem}:nth-child(${index + 1}) ${store.selectors.productCustomButton}`;
                             await page.waitForSelector(selector, { timeout: 15000 });
                             await Promise.all([
@@ -86,7 +109,6 @@ const scrapData = async (req, res) => {
                                 page.click(selector)
                             ]);
 
-                            const product = productsData[index];
                             product.productUrl = page.url();
 
                             await page.goBack();
